@@ -1,7 +1,7 @@
 ///
-/// Sourcey Modal
+/// Sourcey Confab
 ///
-/// A Sourcey JQuery plugin for managing modal dialogs.
+/// A Sourcey JQuery plugin for managing multiple dialog windows.
 ///
 /// Features:
 ///     - Supports layered(multiple) reusable dialogs
@@ -11,18 +11,8 @@
 ///     - Customisable via CSS
 ///
 (function ($) {
-    //
-    // Public methods
-    //
-    $.modal = function(options) {
-        init();
-        options = options || {};
-        if (typeof(options) == 'string')
-            options = { data: options }
-        return createModal(options);
-    }
 
-    // Creates a modal dialog
+    // Creates a modal dialog from selected elements
     $.fn.modal = function(options) {
         init();
         options = options || {};
@@ -46,7 +36,7 @@
         });
     }
 
-    // Creates a tooltip
+    // Creates a tooltip for selected elements
     $.fn.tooltip = function(options) {
         init();
         options = options || {};
@@ -96,8 +86,29 @@
             );
         });
     }
+    
+    // Creates a modal dialog
+    $.modal = function(options) {
+        init();
+        options = options || {};
+        if (typeof(options) == 'string')
+            options = { data: options }
+        return createModal(options);
+    }
 
-    $.modal.options = {
+    // Creates a growl style notification
+    $.growl = function(options) {
+        init();
+        options = options || {}
+        if (typeof(options) == 'string')
+            options = { data: options }
+        return createNotification(options);
+    }
+
+    $.confab = {}  
+    
+    // Default window options
+    $.confab.options = {
         syncSource: true,
         showOverlay: true,
         width: 'auto',
@@ -113,20 +124,11 @@
             <div class="content"> \
             </div> \
           </div>'
-    };
-
-    // Creates a grown style notification
-    $.modal.growl = function(options) {
-        init();
-        options = options || {}
-        if (typeof(options) == 'string')
-            options = { data: options }
-        return createNotification(options);
     }
 
-    $.modal.close = function(id) {
+    $.confab.close = function(id) {
         //console.log('Close: ', id);
-        var modal = $.modal.manager.get(id);
+        var modal = $.confab.manager.get(id);
         if (modal) {
             modal.close();
             return true;
@@ -134,34 +136,36 @@
         return false;
     }
 
-    $.modal.refresh = function() {
-        for (var i = 0; i < $.modal.manager.store.length; i++) {
-            $.modal.manager.store[i].refresh();
+    $.confab.refresh = function() {
+        for (var i = 0; i < $.confab.manager.store.length; i++) {
+            $.confab.manager.store[i].refresh();
         }
     }
     
-    $.modal.closeNotifications = function() {
-        for (var i = 0; i < $.modal.manager.store.length; i++) {
-            if ($.modal.manager.store[i].type == 'notice')
-                $.modal.manager.store[i].close();
+    $.confab.closeNotifications = function() {
+        for (var i = 0; i < $.confab.manager.store.length; i++) {
+            if ($.confab.manager.store[i].type == 'notice')
+                $.confab.manager.store[i].close();
         }
     }
 
-    $.modal.manager = new Manager();
+    $.confab.manager = new Manager();
+
 
     //
     // Private methods
     //
+    
     function init() {
         if ($('div#notifications').length) return;
         $('body').append('<div id="notifications"></div>');
-        $(window).resize(function() { $.modal.refresh(); });
-        $(window).scroll(function() { $.modal.refresh(); });
+        $(window).resize(function() { $.confab.refresh(); });
+        $(window).scroll(function() { $.confab.refresh(); });
     }
 
     function createNotification(options) {
         options.className += ' opacity-75 growl-message';
-        var defaults = $.extend({}, $.modal.options, {
+        var defaults = $.extend({}, $.confab.options, {
             onOpen: function(m,e) {},
             onShow: function(m,e) {},
             onClose: function(m,e) {},
@@ -184,7 +188,7 @@
     }
 
     function createModal(options) {
-        var defaults = $.extend({}, $.modal.options, {
+        var defaults = $.extend({}, $.confab.options, {
             title: '',
             onOpen: function(m,e) {},
             onShow: function(m,e) {},
@@ -194,17 +198,17 @@
 
         var modal;
         if (options.id)
-            modal = $.modal.manager.get(options.id);
+            modal = $.confab.manager.get(options.id);
         if (modal)
             modal.options = $.extend(modal.options, options);
         else {
 
             // Close existing synchronized modals
             if (options.syncSource && options.element) {
-                for (var i = 0; i < $.modal.manager.store.length; i++) {
-                  if ($.modal.manager.store[i].options.element &&
-                      $.modal.manager.store[i].options.element.get(0) === options.element.get(0)) {
-                      $.modal.manager.store[i].close();
+                for (var i = 0; i < $.confab.manager.store.length; i++) {
+                  if ($.confab.manager.store[i].options.element &&
+                      $.confab.manager.store[i].options.element.get(0) === options.element.get(0)) {
+                      $.confab.manager.store[i].close();
                   }
                 }
             }
@@ -223,7 +227,7 @@
             options.element && options.element.attr('id') ?
                 options.element.attr('id') : Sourcey.randomString(8);
         this.options = options;
-        this.index = $.modal.manager.size() * 2;
+        this.index = $.confab.manager.size() * 2;
         this.xhr = null;
         this.timeout = null;
         //console.log('Modal: Creating: ', this.id, options);
@@ -261,7 +265,7 @@
 
             this.refresh();
 
-            $.modal.manager.add(this);
+            $.confab.manager.add(this);
             this.options.onOpen(this, this.element);
         }
 
@@ -351,7 +355,7 @@
             }
 
             self.options.onClose(self, self.element);
-            $.modal.manager.remove(self.id);
+            $.confab.manager.remove(self.id);
 
             //this.element.remove();
             this.element.fadeOut(this.options.fade, function() {
