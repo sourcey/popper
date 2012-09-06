@@ -263,6 +263,13 @@
             if (this.options.css)
                 this.element.css(this.options.css);
 
+            // Capture mouse events and toggle element's .hover class
+            this.element.hover(function () {
+              self.element.addClass('hover');
+            }, function () {
+              self.element.removeClass('hover');
+            });
+
             this.refresh();
 
             $.confab.manager.add(this);
