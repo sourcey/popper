@@ -34,7 +34,7 @@
                     options.containment = window;
                     options.className += ' tooltip';
                     options.width = options.width || 200;
-                    popup = $.popup.create(options);
+                    popup = $.popup(options);
                     popup.element.find('.popup-close').hide();
                     popup.element.hover(
                          function (e) {
