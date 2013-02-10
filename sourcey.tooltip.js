@@ -7,10 +7,10 @@
 
     // Creates a tooltip for selected elements
     $.fn.tooltip = function(options) {
-        console.log('Creating Tooltip: ', options);
+        //console.log('Creating Tooltip: ', options);
         options = options || {};
         return this.each(function () {
-            options.element = $(this);
+            var element = $(this);
             var popup = null;
             var ref = 0;
             var hider = function() {

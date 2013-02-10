@@ -39,7 +39,7 @@
     background-repeat: no-repeat;
 }
 
-.popup .popup-close {
+.popup a.popup-close {
     background: url(/assetpipe/icons/8/close.png) no-repeat 50% 50%;
     position:absolute;
     top:0px;
@@ -56,7 +56,7 @@
     opacity: .5;
 }
 
-.popup .popup-close:hover {
+.popup a.popup-close:hover {
     filter: alpha(opacity=1);
     -ms-filter: "alpha(opacity=1)";
     -khtml-opacity: 1;
@@ -64,8 +64,8 @@
     opacity: 1;
 }
 
-.popup .popup-close:focus,
-.popup .popup-close:active {
+.popup a.popup-close:focus,
+.popup a.popup-close:active {
     background-color: #FF7070;
     filter: alpha(opacity=1);
     -ms-filter: "alpha(opacity=1)";

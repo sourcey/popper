@@ -30,7 +30,7 @@
 
     // Creates a popup dialog from selected elements
     $.fn.popup = function(options) {
-        console.log('@@@ Create Popup: ', options);
+        //console.log('Create Popup: ', options);
         options = options || {};
         return this.each(function () {
             if (this.href) {
@@ -58,6 +58,7 @@
         onShow: function(m,e) {},
         onRefresh: function(m,e) {},
         onClose: function(m,e) {},
+        modal: false,       // Not closable by document click
         syncSource: true,   // clones and replaces source element on closure keeping data intact
         showOverlay: true,  // show the background overlay    
         containment: null, // constrain within the bounds of the given element
@@ -147,6 +148,15 @@
             }
             return false;
         },
+                
+        closeType: function(type) {
+            //console.log('Close Type: ', type);
+            for (var popup in $.popupStore) {
+                if ($.popupStore[popup].options.type == type)
+                    $.popupStore[popup].close();
+            }
+        },
+                
         
         refresh: function(id) {
             for (var popup in $.popupStore)
@@ -191,21 +201,27 @@
             var self = this;
             this.element = $(this.options.template);
             this.element.attr('data-popup', this.id);
+            this.element.data('popup', this);
             if (this.options.className)
                 this.element.addClass(this.options.className);
             this.element.find('.popup-close').click(function() {
                 self.close();
                 return false;
             });
+            if (!this.options.modal) {
+                // Hide on docuemnt mousedown
+                $(document).bind('click', function(event) {
+                    if ($(event.target).parents('.popup').length == 0) {
+                        self.close();
+                        $(this).unbind(event);
+                    }
+                });
+            }
             if (this.options.showOverlay) {
                 this.overlay = $('<div />');
                 this.overlay.attr('class', 'popup-overlay');
                 this.overlay.css('z-index', 1000 + this.index);
                 $('body').append(this.overlay);
-                this.overlay.click(function() {
-                    self.close();
-                    return false;
-                });
             }
             if (this.options.life) {
               this.timeout = setTimeout(function () {
@@ -331,8 +347,7 @@
             }
 
             this.options.onClose(this, this.element);
-            
-            //$.popupStore.remove(self.id);            
+                   
             delete $.popupStore[this.id];
 
             this.element.fadeOut(this.options.fade, function() {
