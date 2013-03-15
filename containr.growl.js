@@ -14,24 +14,24 @@
     
     // Creates a growl style notification
     $.growl = function(options) {
-        return $.popupMethods.createGrowl(options);
+        return Containr.methods.createGrowl(options);
     }
     
-    $.popupMethods.initGrowl = function() {
+    Containr.methods.initGrowl = function() {
         if ($('div#growl-notifications').length) return;
         $('body').append('<div id="growl-notifications"></div>');
     }
     
-    $.popupMethods.closeGrowls = function() {
-        for (var i = 0; i < $.popupStore.length; i++) {
-            if ($.popupStore[i].type == 'growl')
-                $.popupStore[i].close();
+    Containr.methods.closeGrowls = function() {
+        for (var i = 0; i < Containr.store.length; i++) {
+            if (Containr.store[i].type == 'growl')
+                Containr.store[i].close();
         }
     }
 
-    $.popupMethods.createGrowl = function(options) {
+    Containr.methods.createGrowl = function(options) {
         console.log('Growl: Creating: ', options);
-        $.popupMethods.initGrowl();
+        Containr.methods.initGrowl();
         options = options || {}
         if (typeof(options) == 'string')
             options = { data: options }
@@ -59,7 +59,7 @@
             options.life = 0;
             
         // Create it
-        popup = $.popupMethods.create(options);
+        popup = Containr.methods.create(options);
         $('#growl-notifications').append(popup.element);
         popup.load();
     }    
