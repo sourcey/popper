@@ -1,98 +1,77 @@
-///
-/// Sourcey Popup
-///
-/// A Sourcey JQuery plugin for managing popup windows.
-///
-/// Features:
-///     - Supports layered(multiple) reusable dialogs
-///     - AJAX support
-///     - Dynamic positioning
-///     - Update's source element on popup close (retains data)
-///     - Customisable via CSS
-///
+/*
+    Popper.js
+   
+    A window manager for creating and managing dynamic popup windows
+    for web applications.
+        
+        - Supports layered(multiple) reusable dialogs
+        - AJAX support
+        - Dynamic positioning
+        - Update's source element on popup close (retains data)
+        - Customisable via CSS3
 
-Containr = {
+    Copyright (c)2010 Sourcey
+    http://sourcey.com
+    Distributed under The MIT License.
+*/
+
+Popper = {
     
     // Default popup options
     options: {
-        onOpen: function(p,e) {},
-        onShow: function(p,e) {},
-        onRefresh: function(p,e) {},
-        onClose: function(p,e) {},
-        modal: false,               // Not closable by document click
-        syncSource: true,           // clones and replaces source element on closure keeping data intact
-        showOverlay: true,          // show the background overlay    
-        containment: null,          // constrain within the bounds of the given element
-        container: 'body',          // the element the popup will be appended to
-        content: '.popup-content',  // the element the popup will be appended to
-        width: 'auto',              // css width [auto, pixel, percent]
-        height: 'auto',             // css height [auto, pixel, percent]
-        //maxWidth: 0,              // css max width [pixel, percent]
-        //maxHeight: 0,             // css max height [pixel, percent]
+        type: 'default',            // the popup group type
+        modal: false,              // modals do not auto close on document click
+        syncSource: false,         // clones the source element and replaces it on closure
+        showOverlay: true,         // show the background overlay 
+        containment: null,         // constrain within the bounds of the given element
+        container: 'body',         // the element the popup will be appended to
+        content: '.popup-content', // the element the content selector
+        width: 'auto',             // css width [auto, pixel, percent]
+        height: 'auto',            // css height [auto, pixel, percent]
         xPos: 'auto',
         yPos: 'auto',
         life: 0,
         fade: 300,
         className: '',
         template : '\
-          <div class="popup">\
+          <div class="containr popup">\
             <a href="#" class="popup-close"></a>\
             <div class="popup-content">\
             </div>\
           </div>'
-        /*
-        template : '\
-          <div class="popup">\
-            <a href="#" class="close"></a>\
-            <table style="height:100%;">\
-              <tr>\
-                <td class="popup-title">\
-                </td>\
-              </tr>\
-              <tr style="height:100%;">\
-                <td style="height:100%;">\
-                  <div class="popup-content">\
-                  </div>\
-                </td>\
-              </tr>\
-              <tr>\
-                <td class="popup-actions">\
-                </td>\
-              </tr>\
-            </table>\
-          </div>'
-          */
     },
 
+    // Popup store for fast index 
     store: {},
     
+    // API methods
     methods: {    
         init: function() { 
-            if ($('body').data('popup-initialized')) return;
-            $(window).bind('resize', function() { Containr.methods.refresh(); }); //jQuery.event.special.resizeend ? 'resizeend' : 'resize'
-            $(window).bind(jQuery.event.special.scrollstop ? 'scrollstop' : 'scroll', function() { Containr.methods.refresh(); });
-            $('body').data('popup-initialized', true);
+            if (Popper.initialized) return;
+            $(window).bind('resize', function() { Popper.methods.refresh(); }); //jQuery.event.special.resizeend ? 'resizeend' : 'resize'
+            $(window).bind(jQuery.event.special.scrollstop ? 'scrollstop' : 'scroll', function() { Popper.methods.refresh(); });
+            Popper.initialized = true;
         },
         
         create: function(options) {       
-            options = Containr.methods.coerceOptions(options);
+            options = Popper.methods.coerce(options);
 
             var popup;
             if (options.id)
-                popup = Containr.store[options.id];
+                popup = Popper.store[options.id];
             if (popup)
                 popup.options = $.extend(popup.options, options);
             else {
                 // Close existing synchronized popups with matching source element
                 if (options.syncSource && options.element) {                
-                    for (var popup in Containr.store) {
-                        if (Containr.store[popup].options.element &&
-                            Containr.store[popup].options.element.get(0) === options.element.get(0)) {
-                            Containr.store[popup].close();
+                    for (var popup in Popper.store) {
+                        if (Popper.store[popup].options.element &&
+                            Popper.store[popup].options.element.get(0) === options.element.get(0)) {
+                            Popper.store[popup].close();
                         }
                     }
                 }
-                popup = new Containr.Popup(options);
+                popup = new Poppable(options);
                 popup.init();
             }
 
@@ -102,7 +81,7 @@ Containr = {
         
         close: function(id) {
             //console.log('Close: ', id);
-            var popup = Containr.store[id];
+            var popup = Popper.store[id];
             if (popup) {
                 popup.close();
                 return true;
@@ -112,26 +91,34 @@ Containr = {
                 
         closeType: function(type) {
             //console.log('Close Type: ', type);
-            for (var popup in Containr.store) {
-                if (Containr.store[popup].options.type == type)
-                    Containr.store[popup].close();
+            for (var popup in Popper.store) {
+                if (Popper.store[popup].options.type == type)
+                    Popper.store[popup].close();
             }
         },
-                
+        
+        trigger: function(name, popup) {              
+            //console.log('Popup: Trigger: ', name);      
+            $(document).trigger('popup:' + name, popup)
+            if (popup.options.element) {
+                console.log('Popup: Trigger Element: ', name, $._data(popup.options.element.get(0), "events"));      
+                popup.options.element.trigger('popup:' + name, popup)
+            }
+        },                
         
         refresh: function(id) {
-            for (var popup in Containr.store)
-                Containr.store[popup].refresh();
+            for (var popup in Popper.store)
+                Popper.store[popup].refresh();
         },
         
         count: function() {
             i = 0;
-            for (var popup in Containr.store)
+            for (var popup in Popper.store)
                 i++;
             return i;
         },
         
-        coerceOptions: function(options) {
+        coerce: function(options) {
             options = options || {};
             if (typeof(options) == 'string')
                 options = { data: options }  
@@ -139,38 +126,38 @@ Containr = {
                 options.element = $(options.element)
             if (options.containment)
                 options.containment = $(options.containment)
-            return $.extend({}, Containr.options, options);  
+            return $.extend({}, Popper.options, options);  
         },
     }
 }
 
 
-Containr.methods.init();
+Popper.methods.init();
 
 
 //
 // This class implements a popup window.
-Containr.Popup = function(options) {
+Poppable = function(options) {
     this.options = options;
-    this.id = options.id ? options.id :
+    this.id = options.id = options.id ? options.id :
         options.element && options.element.attr('id') ?
             options.element.attr('id') : 
               Math.random().toString(36).substring(7);
-    this.index = Containr.methods.count() * 2;
+    this.index = Popper.methods.count() * 2;
     this.xhr = null;
     this.timeout = null;
     //console.log('Popup: Creating: ', this.id, options);
 }
     
     
-Containr.Popup.prototype = {
+Poppable.prototype = {
     init: function() {
-        //console.log('Popup: Initializing: ', this.id);        
-
+        //console.log('Popup: Initializing: ', this.id);
         var self = this;
         this.element = $(this.options.template);
-        this.element.attr('data-popup', this.id);
         this.element.data('popup', this);
+        this.element.attr('data-popup-id', this.id);
+        //this.element.attr('data-popup-type', this.options.type);
         if (this.options.className)
             this.element.addClass(this.options.className);
         this.element.find('.popup-close').click(function() {
@@ -193,7 +180,6 @@ Containr.Popup.prototype = {
             // Hide on docuemnt mousedown
             $(document.body).bind('click', function(event) {
                 if ($(event.target).parents('.popup').length == 0) {
-                    //console.log('Popup: Document OnClick: ', event, self.id);
                     self.close();
                     $(this).unbind(event);
                 }
@@ -203,15 +189,14 @@ Containr.Popup.prototype = {
             this.element.css(this.options.css);
 
         // Capture mouse events and toggle element's .hover class
-        this.element.hover(
-            function () { self.element.addClass('hover'); }, 
-            function () { self.element.removeClass('hover'); });
+        //this.element.hover(
+        //    function () { self.element.addClass('hover'); }, 
+        //    function () { self.element.removeClass('hover'); });
                     
         $(this.options.container).append(this.element);
 
-        Containr.store[this.id] = this;
-        
-        this.options.onOpen(this, this.element);
+        Popper.store[this.id] = this;        
+        Popper.methods.trigger('open', this)
         return this;
     },
 
@@ -227,12 +212,10 @@ Containr.Popup.prototype = {
     },
 
     loadData: function(data) {
-        //console.log('Popup: Loading Data: ', data);
         this.show(data);
     },
     
     loadElement: function(element) {
-        //console.log('Popup: Loading Element: ', element);
         this.options.element = element;
         this.options.element.data('popup', this)
 
@@ -245,7 +228,6 @@ Containr.Popup.prototype = {
     },
 
     loadURL: function(url) {
-        //console.log('Popup: Loading URL: ', url);
         var self = this;
         this.loading(true);            
         this.refresh();
@@ -265,8 +247,6 @@ Containr.Popup.prototype = {
     },
 
     show: function(data) {
-        //console.log('Popup: Showing: ', this.id, data);
-
         this.loading(false);
 
         /*
@@ -288,13 +268,12 @@ Containr.Popup.prototype = {
         else
             content.show();
 
-        this.options.onShow(this, this.element);
-
+        Popper.methods.trigger('show', this)
+        
         this.refresh();
     },
 
     close: function() {
-        //console.log('Popup: Closing: ',  this.id)
         var self = this;
 
         if (this.xhr) {
@@ -321,14 +300,15 @@ Containr.Popup.prototype = {
             }
         }
                
-        delete Containr.store[this.id];
+        delete Popper.store[this.id];        
 
-        if (this.options.onClose(this, this.element) != false) {
-            this.element.fadeOut(this.options.fade, function() {
-                //console.log('Popup: Closing: Removing: ', self.id)
-                self.element.remove();
-            });
-        }
+        Popper.methods.trigger('close', this)
+        
+        // TODO: Can't get false on close, check tooltip hiding
+        this.element.fadeOut(this.options.fade, function() { // != false) {
+            //console.log('Popup: Closing: Removing: ', self.id)
+            self.element.remove();
+        });
     },
 
     refresh: function() {
@@ -345,7 +325,8 @@ Containr.Popup.prototype = {
         // Refresh callback
         // Calling onRefresh before we set the position so the
         // application can modify the size inside the callback.
-        this.options.onRefresh(this, this.element);       
+        //this.options.onRefresh(this, this.element);       
+        Popper.methods.trigger('refresh', this)
 
         // Update position
         var css = this.options.css || {};            
