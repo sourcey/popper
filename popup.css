@@ -19,7 +19,7 @@
 }
 
 .popup {
-    position: fixed;
+    position: absolute;
     min-height: 50px;
     -webkit-border-radius: 6px;
     -moz-border-radius: 6px;
