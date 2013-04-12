@@ -21,11 +21,12 @@ var Popper = {
     options: {
         type: 'default',            // the popup group type
         modal: false,              // modals do not auto close on document click
-        syncSource: false,         // clones the source element and replaces it on closure
         showOverlay: true,         // show the background overlay 
         centered: true,            // center the popup on the screen, overrides x,y offset
         containment: null,         // constrain within the bounds of the given element
         relativeTo: null,          // show the popup relative to the given element
+        element: undefined,         // the optional source element
+        cloneSource: false,        // clones the source element
         root: 'body',              // the element the popup will be appended to
         content: '.popup-content', // the element the content selector
         width: 'auto',             // css width [auto, pixel, percent]
@@ -36,7 +37,7 @@ var Popper = {
         fade: 300,
         className: '',
         template : '\
-          <div class="containr popup">\
+          <div class="popup">\
             <a href="#" class="popup-close"></a>\
             <div class="popup-content">\
             </div>\
@@ -67,7 +68,7 @@ var Popper = {
             //    popup.options = $.extend(popup.options, options);
             //else {
                 // Close existing synchronized popups with matching source element
-                if (options.syncSource && options.element) {                
+                if (options.element && options.cloneSource === false) {                
                     for (var popup in Popper.store) {
                         if (Popper.store[popup].options.element &&
                             Popper.store[popup].options.element.get(0) === options.element.get(0)) {
@@ -125,7 +126,7 @@ var Popper = {
                 options.id = (options.element && options.element.attr('id')) ?
                     options.element.attr('id') : 
                     Math.random().toString(36).substring(7);                
-            if (!options.index) // << depreciate me
+            if (!options.index) // TODO: depreciate me
                 options.index = this.count() + 1;
             return $.extend({}, Popper.options, options);  
         },
@@ -145,8 +146,6 @@ var Poppable = function(options) {
     this.type = options.type; 
     this.xhr = null;
     this.timeout = null;
-    
-    console.log('Poppable: Showing: ', this.options);
 }    
     
 Poppable.prototype = {
@@ -197,7 +196,7 @@ Poppable.prototype = {
         $(this.options.root).append(this.element);
 
         Popper.store[this.id] = this;        
-        this.trigger('open', this)
+        this.trigger('open')
         return this;
     },
 
@@ -221,15 +220,20 @@ Poppable.prototype = {
     },
     
     loadElement: function(element) {
-        this.options.element = element;
-        this.options.element.data('popup', this)
 
-        // Set a placeholder for the data if required.
-        if (this.options.syncSource)
-            element.wrap('<div id="popup-placeholder-' + this.id + '"></div>');
-        this.wasHidden = !element.is(':visible');
-        this.show(element.show());
-        //element.hide();.clone(true).show()
+        // Set a placeholder for the source
+        if (this.options.cloneSource === false) {
+            this.wasHidden = !element.is(':visible');            
+            if (element.parent().length) {
+                this.placeHolder = $('<div id="popup-placeholder-' + this.id + '"></div>');
+                this.sourceElement = element;
+                this.sourceElement.before(this.placeHolder);
+            }
+            this.show(element.show());
+            
+        // Otherwise clone the source element
+        } else
+            this.show(element.clone().show());
     },
 
     loadURL: function(url) {
@@ -252,7 +256,7 @@ Poppable.prototype = {
     },
 
     show: function(data) {
-        //console.log('Popup: Showing: ', this.options.url, this.id);
+        console.log('Popup: Showing: ', this.id, data);
         this.loading(false);
                     
         if (this.options.title)
@@ -260,22 +264,19 @@ Poppable.prototype = {
                 '<h1 class="popup-title">' + this.options.title + '</h1>');
         var c = this.content();
         c.hide();
-        c.html(data);
+        c.append(data);
         if (this.options.url && 
             this.options.fade > 0) // Fade in AJAX content
             c.fadeIn(this.options.fade);
         else
             c.show();
 
-        this.trigger('show', this)
-        
+        this.trigger('show');        
         this.refresh();
-        this.refresh();
+        this.refresh(); // for correct left margin calculation
     },
 
     close: function() {
-        var self = this;
-
         if (this.xhr) {
             this.xhr.abort()
             this.xhr = null
@@ -289,31 +290,31 @@ Poppable.prototype = {
         if (this.options.element)
             this.options.element.data('popup', null);
         
-        // Replace source element if synchronized
-        if (this.options.syncSource) {                    
-            var content = this.content().contents();
-            var placeholder = $('#popup-placeholder-' + this.id);
-            if (self.wasHidden)
-                content.hide();
-            placeholder.before(content);
-            placeholder.remove();
-            this.element.html(content.clone()); // clone so we can fade out
+        // Replace the source element if synchronized
+        if (this.placeHolder) {
+            if (this.wasHidden)
+                this.sourceElement.hide();
+            this.placeHolder.before(this.sourceElement);
+            this.placeHolder.remove();
+            this.content().html(this.sourceElement.clone()); // clone so we can fade out
         }
                
         delete Popper.store[this.id];
-        this.trigger('close', this)
+        this.trigger('close')
         
         // Remove the element if noHide is not set
-        if (this.options.noHide !== true)
+        if (this.options.noHide !== true) {            
+            var self = this;
             this.element.fadeOut(this.options.fade,
                 function() { self.element.remove(); });
+        }
     },
 
     refresh: function() {
     
         // Skip resizing if the noResize flag is set.
         if (this.options.noResize) {
-            this.trigger('refresh', this)
+            this.trigger('refresh')
             return;
         }
            
@@ -323,7 +324,7 @@ Poppable.prototype = {
         // Refresh callback
         // Calling onRefresh before we set the position so the
         // application can modify the size inside the callback.
-        this.trigger('refresh', this);
+        this.trigger('refresh');
 
         var css = this.options.css || {};
         if (this.options.xOffset)
@@ -388,16 +389,20 @@ Poppable.prototype = {
         }
     }, 
         
-    trigger: function(name, popup) {                
-        if (popup.options.element) 
-            // Events will bubble to document level handlers
-            popup.options.element.trigger('popup:' + name, popup)
-        else      
-            $(document).trigger('popup:' + name, popup)
+    trigger: function(name) {       
+        // Events will bubble to document level handlers         
+        if (this.options.element && 
+            this.options.cloneSource === false) {
+            this.options.element.trigger('popup:' + name, this)
+        }
+        else {
+            $(this.element).trigger('popup:' + name, this)
+        }
     },
     
     content: function() {
         // The content element may be a child or the root element itself
-        return this.element.find(this.options.content).add(this.element.filter(this.options.content));
+        return this.element.find(this.options.content).add(
+            this.element.filter(this.options.content));
     }
 };

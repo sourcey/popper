@@ -13,7 +13,7 @@
 (function ($) {    
     var constants = {
         type: 'tooltip',
-        syncSource: false,
+        cloneElement: false,
         showOverlay: false,
         centered: false,
         //noResize: true,
@@ -129,7 +129,7 @@
             /*
         options = options || {};
         options.type = 'tooltip';
-        options.syncSource = false;
+        options.cloneElement = false;
         options.showOverlay = false;
         options.centered = false;
         options.width = 'auto';

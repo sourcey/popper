@@ -11,7 +11,7 @@
 
 (function ($) {    
     //
-    // Growl JQuery constructor
+    // Growl constructor
     $.growl = function(options) {
         return Popper.methods.createGrowl(options);
     }
@@ -22,7 +22,7 @@
         //console.log('Growl: Creating: ', options);
         Popper.methods.initGrowl();
         options = options || {}
-        if (typeof(options) == 'string')
+        if (typeof(options) === 'string')
             options = { data: options }
         
         // Defaults
@@ -30,26 +30,26 @@
             sticky: false,
             life: 5000,
             fade: 750,
-            template : '\
-              <div class="popup opacity-75 growl-message">\
-                <a href="#" class="popup-close"></a>\
-                <div class="popup-content"></div>\
-              </div>'
+            //template : '\
+            //  <div class="popup opacity-75 popup-growl">\
+            //    <a href="#" class="popup-close"></a>\
+            //    <div class="popup-content"></div>\
+            //  </div>'
         }, options);
         
         // Constants
+        options.root = '#growl-notifications'
         options.type = 'growl';
-        options.width = 0; // use css
-        options.yPos = 0;  // use css
-        options.xPos = 0;  // use css
+        options.width = 'auto'; // use css
+        options.height = 'auto'; // use css
         options.showOverlay = false;
+        options.centered = false;
         if (options.sticky)
             options.life = 0;
             
         // Create it
-        popup = Popper.methods.create(options);
-        $('#growl-notifications').append(popup.element);
-        popup.load();
+        return Popper.methods.create(options).load();
+        
     }
     
     Popper.methods.initGrowl = function() {
