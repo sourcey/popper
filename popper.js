@@ -37,11 +37,11 @@ var Popper = {
         fade: 300,
         className: '',
         template : '\
-          <div class="popup">\
-            <a href="#" class="popup-close"></a>\
-            <div class="popup-content">\
-            </div>\
-          </div>'
+<div class="popup">\
+  <a href="#" class="popup-close"></a>\
+  <div class="popup-content">\
+  </div>\
+</div>'
     },
 
     // Popup store for fast index 
@@ -256,7 +256,7 @@ Poppable.prototype = {
     },
 
     show: function(data) {
-        console.log('Popup: Showing: ', this.id, data);
+        //console.log('Popup: Showing: ', this.id);
         this.loading(false);
                     
         if (this.options.title)

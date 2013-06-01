@@ -1,18 +1,12 @@
 /* TOOLTIPS
 ----------------------------------------------------------------------------- */
-
-/*
 .tooltip-popup {
     pointer-events: none;
     background-color: transparent;  
 }
-*/
 
 .tooltip-container {
     position: relative;
-    /*
-    cursor: help;
-    */
 }
 
 .tooltip {
@@ -42,14 +36,14 @@
 .tooltip:before {
     position: absolute;
     display: block;
-    content: " ";/*
-    background-color: rgba(255, 0, 0, 0.1);*/
+    content: " ";
+    /*  background-color: rgba(255, 0, 0, 0.1);*/
 }
 .tooltip:after {    
     position: absolute;
     border: 8px solid transparent;
-    content: " ";/*
-    background-color: rgba(0, 255, 0, 0.1);*/
+    content: " ";
+    /* background-color: rgba(0, 255, 0, 0.1);*/
 }    
 .tooltip.tooltip-always,
 .tooltip-container.hover .tooltip,
@@ -211,12 +205,12 @@
 
 /* Tooltip Align Left */
 .tooltip-align-left {
-    margin: 10px 0 0 0;
+    /* margin: 10px 0 0 0; */
     left: auto;
     right: 0;
 }
 .tooltip-align-left:after {    
-    margin-left: 0;
+    /* margin-left: 0; */
     left: auto;
     right: 4px;
 } 

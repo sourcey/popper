@@ -53,7 +53,7 @@
     }
     
     Popper.methods.initGrowl = function() {
-        if ($('div#growl-notifications').length) return;
+        if ($('body > div#growl-notifications').length) return;
         $('body').append('<div id="growl-notifications"></div>');
     }
     

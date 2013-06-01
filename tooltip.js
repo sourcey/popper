@@ -23,99 +23,129 @@
         content: '.tooltip'
     }
 
-    // Default tooltip constructor
+    //
+    // Tooltip constructor            
     //    
     // Tooltips can be displayed when the target element is hovered,
     // or continously by specifying the 'always' and 'life' options.
-    $.fn.tooltip = function(options) {
-        options = parseOptions(options)
-        
-        // Initialize tooltips for selected elements
-        return this.each(function () {
-            options.root = $(this);
-            options.root.addClass('tooltip-container')
-            
-            // Subscribe to tooltip close event to restore modified
-            // elements to their original state.            
-            $(document).bind('popup:close', function(ev, popup) {
-                if (popup.id != options.id)
-                    return;
-            
-                //popup.options.root.removeClass('tooltip-container')
-                
-                // If always show is true we override default close
-                // behaviour and hide after timeout to CSS3 transitions
-                // can do their thing.
-                if (options.always) {
-                    popup.element.removeClass('tooltip-always')
-                    setTimeout(function () {
-                        popup.element.remove();
-                    }, 500); // 500ms should be enough for any effects
-                    
-                    // Set noHide flag to tell Poppable to skip hiding
-                    popup.options.noHide = true;
-                }  
-                $(this).unbind('popup:close', arguments.callee);
-            })
-        
-            $.popup(options); 
-        });
-    }
-
-    // Absolute tooltip constructor
     //
     // Absolute tooltips operate the same way as default tooltips, except
     // that they are inserted to the document body level, instead of to 
     // the target element. This is useful for displaying tooltips inside
     // elements with hidden overflow, such as scrolled elements.
-    $.fn.absTooltip = function(options) {        
-        options = parseOptions(options)
-        options.template = '<div class="tooltip-container">&nbsp;' + options.template + '</div>';
-        options.className = '';   
+    $.fn.tooltip = function(options) {
+        options = coerceOptions(options)
         
-        // Initialize tooltips for selected elements
-        return this.each(function () {
-            var e = $(this);
-            e.addClass('has-tooltip')
-            options.relativeTo = e;        
-            var tooltip;
-            e.mouseenter(
-                function() { 
-                    options.width = e.outerWidth();
-                    options.height = e.outerHeight();   
-                    if (tooltip)
-                        return;                    
-                    var timeout = null;
-                    tooltip = $.popup(options);
-                    tooltip.element.hover(
-                        function() {
-                            clearTimeout(timeout)
-                        }, function() {
-                            timeout = setTimeout(function () {
-                                tooltip.close();
-                                tooltip = null;
-                            }, 500);
-                        })
-                })
-        });
-    }
+        //
+        // Create a standard non-overlayed tooltip
+        if (options.overlay !== true) {      
+                      
+            return this.each(function () {
+                console.log('Creating Tooltip');
+                options.root = $(this);
+                options.root.addClass('tooltip-container')
+                bindOnClose(options);            
+                Popper.methods.create(options).load();
+            });  
+        }
+        
+        //
+        // Create an overlayed tooltip that shows on hover
+        else if (
+            options.overlay === true && 
+            options.always !== true) {            
+            options.template = '<div class="tooltip-container">&nbsp;' + options.template + '</div>';
+            options.className = '';
+                                
+            return this.each(function () {
+                console.log('Creating Overlayed Tooltip');    
+                var e = $(this);
+                e.addClass('has-tooltip')
+                options.relativeTo = e;        
+                var tooltip;
+                e.mouseenter(
+                    function() { 
+                        options.width = e.outerWidth();
+                        options.height = e.outerHeight();   
+                        if (tooltip)
+                            return;                    
+                        var timeout = null;
+                        tooltip = Popper.methods.create(options).load();
+                        tooltip.element.hover(
+                            function() {
+                                clearTimeout(timeout)
+                            }, function() {
+                                timeout = setTimeout(function () {
+                                    tooltip.close();
+                                    tooltip = null;
+                                }, 500);
+                            })
+                    })
+            });
+        }
+        
+        //
+        // Create an overlayed tooltip that is always visible
+        else if (
+            options.overlay === true && 
+            options.always === true) {            
+            options.template = '<div class="tooltip-container">&nbsp;' + options.template + '</div>';
+            options.className = '';
+                     
+            return this.each(function () {
+                console.log('Creating Overlayed Fixed Tooltip');   
+                var e = $(this);
+                e.addClass('has-tooltip')
+                options.relativeTo = e;    
+                options.width = e.outerWidth();
+                options.height = e.outerHeight();
+                bindOnClose(options);
+                Popper.methods.create(options).load();
+            });
+        }            
+    };
     
-    var parseOptions = function(options) {            
+    var coerceOptions = function(options) {            
         options = $.extend({}, constants, options);  
         options.id = Math.random().toString(36).substring(7)
-        options.template = '<div class="tooltip ' + options.className + '"></div>';
-        options.className = '';
         
         // Add a special class for tooltips that are always visible.
         if (options.always)
             options.className += ' tooltip-always'
+            
+        options.template = '<div class="tooltip ' + options.className + '"></div>';
+        options.className = '';
         
-        // options.modal can be set to true to hide 'always' visible
-        // tooltips on document click
+        // The modal can be set to true to hide always visible
+        // tooltips on document click.
         if (typeof options.modal === 'undefined')
             options.modal = true;     
             
         return options;
+    }
+    
+    var bindOnClose = function(options) {  
+                                
+        // Subscribe to tooltip close event to restore modified
+        // elements to their original state.            
+        $(document).bind('popup:close', function(ev, popup) {
+            if (popup.id != options.id)
+                return;
+            
+            // If always show is true we override default close
+            // behaviour and hide after timeout to CSS3 transitions
+            // can do their thing.
+            if (options.always) {
+                popup.content().removeClass('tooltip-always')
+                setTimeout(function () {
+                    popup.element.remove();
+                }, 500); // 500ms should be enough for any effects
+                
+                // Set noHide flag to tell Poppable to skip hiding
+                popup.options.noHide = true;
+            }  
+            $(this).unbind('popup:close', arguments.callee);
+        })
     }
 })(jQuery);
 
