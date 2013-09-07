@@ -30,10 +30,12 @@
             if (this.href) {
                 $(this).click(function() {
 
-                    // Support for rel="popup.className" syntax to add a class.
-                    var className = this.rel.match(/popup\.([-_\sa-zA-Z]+)/)
-                    if (className) className = className[1];
-                    options.className = className;
+                    // Support for rel="popup.className.className2" syntax to add a class.
+                    var classNames = this.rel.split('.');
+                    if (classNames.length) {            
+                        classNames.shift();
+                        options.className += classNames.join(' ');
+                    }
                     options.url = this.href;
                     Popper.methods.create(options).load();
                     return false;

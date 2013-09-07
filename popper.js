@@ -348,13 +348,17 @@ Poppable.prototype = {
         
         // Or center the popup on screen        
         else if (this.options.centered) {
+        
+            // Apply CSS so we know the element width
+            this.element.css(css);
+        
             css.position = css.position || 'absolute';
             css.left = '50%';         
-            css.marginLeft = css.marginLeft || 0;   
-            css.marginLeft += -this.element.width() / 2; // + 'px';
+            css.marginLeft = css.marginLeft || 0;
+            css.marginLeft += -(/*parseInt(css.width) ||*/ this.element.width()) / 2; // + 'px';
             css.top = '50%';
             css.marginTop = css.marginTop || 0;   
-            css.marginTop += -this.element.height() / 2; // + 'px'; 
+            css.marginTop += -(/*parseInt(css.height)  ||*/ this.element.height()) / 2; // + 'px'; 
         }
             
         // Apply CSS
