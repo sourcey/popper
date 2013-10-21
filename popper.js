@@ -169,6 +169,11 @@ Poppable.prototype = {
             return false;
         });
         
+        // Set the title
+        if (this.options.title)
+            this.element.prepend(
+                '<h1 class="popup-title">' + this.options.title + '</h1>');
+        
         // Set close timeout if required
         if (this.options.life)
           this.timeout = setTimeout(function () { 
@@ -259,9 +264,6 @@ Poppable.prototype = {
         //console.log('Popup: Showing: ', this.id);
         this.loading(false);
                     
-        if (this.options.title)
-            this.element.append(
-                '<h1 class="popup-title">' + this.options.title + '</h1>');
         var c = this.content();
         c.hide();
         c.append(data);
