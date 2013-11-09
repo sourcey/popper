@@ -176,14 +176,15 @@ Poppable.prototype = {
         
         // Set close timeout if required
         if (this.options.life)
-          this.timeout = setTimeout(function () { 
-              self.close(); }, this.options.life);  
+            this.timeout = setTimeout(
+                function () { self.close(); }, this.options.life);  
         
         // Non-modals are closed on document mousedown      
         if (!this.options.modal) {
             $(document.body).bind('click', function(event) {
                 if ($(event.target).parents('.popup').length == 0) {
-                    self.close();
+                    if (!self.closed)
+                        self.close();
                     $(this).unbind(event);
                 }
             });
@@ -273,12 +274,16 @@ Poppable.prototype = {
         else
             c.show();
 
+        this.closed = false;
         this.trigger('show');        
         this.refresh();
-        this.refresh(); // for correct left margin calculation
+        this.refresh(); // for correct left offset calculation
     },
 
     close: function() {
+        if (this.closed)
+          throw 'Already closed'
+          
         if (this.xhr) {
             this.xhr.abort()
             this.xhr = null
@@ -298,10 +303,12 @@ Poppable.prototype = {
                 this.sourceElement.hide();
             this.placeHolder.before(this.sourceElement);
             this.placeHolder.remove();
+            this.placeHolder = null;
             this.content().html(this.sourceElement.clone()); // clone so we can fade out
         }
                
         delete Popper.store[this.id];
+        this.closed = true;
         this.trigger('close')
         
         // Remove the element if noHide is not set
@@ -358,9 +365,11 @@ Poppable.prototype = {
             css.left = '50%';         
             css.marginLeft = css.marginLeft || 0;
             css.marginLeft += -(/*parseInt(css.width) ||*/ this.element.width()) / 2; // + 'px';
+            css.marginLeft += $(window).scrollLeft();
             css.top = '50%';
             css.marginTop = css.marginTop || 0;   
             css.marginTop += -(/*parseInt(css.height)  ||*/ this.element.height()) / 2; // + 'px'; 
+            css.marginTop += $(window).scrollTop();
         }
             
         // Apply CSS
@@ -376,14 +385,16 @@ Poppable.prototype = {
         if (this.options.containment && 
             this.options.containment.length) {
             
-            var diff = this.options.containment.width() - (this.element.offset().left + this.element.width());
+            var diff = (this.options.containment.width() + $(window).scrollLeft()) - 
+                (this.element.offset().left + this.element.width());
             if (diff < 0) {
                 diff -= 5;
                 css.marginLeft = css.marginLeft || 0;
                 css.marginLeft = css.marginLeft + diff;                      
             } 
             
-            diff = this.options.containment.height() - (this.element.offset().top + this.element.height());
+            diff = (this.options.containment.height() + $(window).scrollTop()) - 
+                (this.element.offset().top + this.element.height());
             if (diff < 0) {
                 diff -= 5;
                 css.marginTop = css.marginTop || 0;

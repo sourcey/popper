@@ -35,13 +35,13 @@
 }
 
 .popup.loading {
-    background-image: url(/assetpipe/icons/32/indicator.gif);
+    background-image: url(/static/icons/32/indicator.gif);
     background-position: 50% 50%;
     background-repeat: no-repeat;
 }
 
 .popup a.popup-close {
-    background: url(/assetpipe/icons/8/close.png) no-repeat 50% 50%;
+    background: url(/static/icons/8/close.png) no-repeat 50% 50%;
     position: absolute;
     top: 0px;
     right: 0px;
