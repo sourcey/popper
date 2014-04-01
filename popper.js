@@ -1,14 +1,7 @@
 /*
     Popper.js
    
-    A window manager for creating and managing dynamic popup windows
-    for web applications.
-        
-        - Supports layered(multiple) reusable dialogs
-        - AJAX support
-        - Dynamic positioning
-        - Update's source element on popup close (retains data)
-        - Customisable via CSS3
+    Dynamic popup windows, modals, dialogs, tooltips and notifications for web applications.
 
     Copyright (c)2010 Sourcey
     http://sourcey.com

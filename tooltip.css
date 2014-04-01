@@ -11,8 +11,8 @@
 
 .tooltip {
     position: absolute;
-    width: 190px;
-    padding: 6px 10px;
+    width: 240px;
+    padding: 10px 10px;
     display: block;    
     opacity: 0;
     color: #e0e0e0;
@@ -58,7 +58,7 @@
 .tooltip-top {
     bottom: 100%;
     left: 50%;
-    margin: 0 0 10px -105px;
+    margin: 0 0 10px -130px;
     -webkit-transform: translateY(10px);
     -moz-transform: translateY(10px);
     -ms-transform: translateY(10px);
@@ -91,7 +91,7 @@
 /* Tooltip Bottom
 ............................................................................. */
 .tooltip-bottom {
-    margin: 10px 0 0 -105px;
+    margin: 10px 0 0 -130px;
     left: 50%;
     top: 100%;
     -webkit-transform: translateY(-10px);

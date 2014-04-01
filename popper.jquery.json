@@ -1,0 +1,38 @@
+{
+    "name": "popper",
+    "title": "Popper",
+    "description": "Dynamic popup windows, modals, dialogs, tooltips and notifications for web applications.",
+    "keywords": [
+        "modal",
+        "dialog",
+        "popup",
+        "tooltip",
+        "notification",
+        "growl"
+    ],
+    "version": "0.8.0",
+    "author": {
+        "name": "Sourcey",
+        "url": "https://sourcey.com"
+    },
+    "maintainers": [
+        {
+            "name": "Kam Low",
+            "email": "auscaster@gmail.com",
+            "url": "https://github.com/auscaster"
+        }
+    ],
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "http://opensource.org/licenses/MIT"
+        }
+    ],
+    "bugs": "https://github.com/sourcey/popper/issues",
+    "homepage": "https://github.com/sourcey/popper",
+    "docs": "https://github.com/sourcey/popper",
+    "download": "https://github.com/sourcey/popper/archive/master.zip",
+    "dependencies": {
+        "jquery": ">=1.8"
+    }
+}
