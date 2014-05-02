@@ -1,14 +1,5 @@
 /* TOOLTIPS
 ----------------------------------------------------------------------------- */
-.tooltip-popup {
-    pointer-events: none;
-    background-color: transparent;  
-}
-
-.tooltip-container {
-    position: relative;
-}
-
 .tooltip {
     position: absolute;
     width: 240px;
@@ -45,11 +36,29 @@
     content: " ";
     /* background-color: rgba(0, 255, 0, 0.1);*/
 }    
+.tooltip.tooltip-visible,
 .tooltip.tooltip-always,
 .tooltip-container.hover .tooltip,
 .tooltip-container:hover .tooltip {
     opacity: 1;
     pointer-events: auto;
+}
+
+.tooltip-popup {
+    pointer-events: none;
+    background-color: transparent;  
+}
+
+.tooltip-container {
+    position: relative;
+    cursor: help;
+}
+
+/* Overlayed tooltips should not handle mouse otherwise 
+they will prevent scrolling, especially on nested elements */
+.tooltip-overlay-container,
+.tooltip-overlay {
+    pointer-events: none !important;
 }
 
 
