@@ -10,7 +10,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: white;
+    background-color: black;
     filter: alpha(opacity=33);
     -ms-filter: "alpha(opacity=33)";
     -khtml-opacity: .33;
@@ -21,6 +21,7 @@
 .popup {
     position: absolute;
     min-height: 50px;
+    max-height: 80%;
     /*
     -webkit-border-radius: 6px;
     -moz-border-radius: 6px;
@@ -33,7 +34,7 @@
 }
 
 .popup.skinny {
-    width: 430px !important;
+    width: 420px !important;
 }
 
 .popup.loading {
@@ -43,46 +44,31 @@
 }
 
 .popup a.popup-close {
-    background: url(/static/icons/8/close.png) no-repeat 50% 50%;
     position: absolute;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
-    width: 10px;
-    height: 10px;
-    padding: 2px;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    margin: 2px;
+    padding: 0;
+    line-height: 16px;
+    text-align: center;
     z-index: 1;
-    filter: alpha(opacity=50);
-    -ms-filter: "alpha(opacity=50)";
-    -khtml-opacity: .5;
-    -moz-opacity: .5;
     opacity: .5;
 }
 
-.popup a.popup-close:hover {
-    filter: alpha(opacity=1);
-    -ms-filter: "alpha(opacity=1)";
-    -khtml-opacity: 1;
-    -moz-opacity: 1;
+/*.popup a.popup-close:hover {
     opacity: 1;
 }
 
 .popup a.popup-close:focus,
 .popup a.popup-close:active {
-    background-color: #FF7070;
-    filter: alpha(opacity=1);
-    -ms-filter: "alpha(opacity=1)";
-    -khtml-opacity: 1;
-    -moz-opacity: 1;
     opacity: 1;
-}
-
+}*/
 .popup .popup-content {
-    padding: 10px;
+    padding: 24px;
     /*
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
+    border-radius: 2px;
     */
 }
 
